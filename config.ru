@@ -11,7 +11,7 @@ module Rack
       request = Request.new(env)
       status, headers, body = @app.call(env)
       path = request.path
-      body_filename = path.split('/').reverse.first
+      body_filename = path.split('/').reverse.first.gsub(/\?.*/, '')
       if body_filename && !body_filename.empty? &&
          body_filename != '/' && File.exists?(body_filename)
         file = File.open("./#{body_filename}","r")
