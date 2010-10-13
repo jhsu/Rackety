@@ -8,27 +8,32 @@ module Rack
     end
 
     def call(env)
-      request = Request.new(env)
-      status, headers, body = @app.call(env)
-      path = request.path
-      if request.post?
-        if file = request.params['file']
-          FileUtils.rm("./uploads/#{file[:filename]}") if File.exists?("./uploads/#{file[:filename]}")
+      @request = Request.new(env)
+      status, headers, @body = @app.call(env)
+      if @request.post?
+        if file = @request.params['file']
           FileUtils.mv file[:tempfile].path, "./uploads/#{file[:filename]}"
-          [status, headers, [request.params.to_s]]
-        else
-          [status, headers, [request.params.to_s]]
         end
+      end
+      if response_body
+        [status, headers, [response_body]]
       else
-        body_filename = path.split('/').reverse.first.gsub(/\?.*/, '')
-        if body_filename && !body_filename.empty? &&
-           body_filename != '/' && File.exists?(body_filename)
-          file = File.open("./#{body_filename}","r")
-          file_body = file.read
+        [status, headers, [@body]]
+      end
+    end
+
+    def response_body
+      @response_body ||= begin
+        if path = @request.path.split('/').reverse.first
+          response_filename = path.gsub(/\?.*/, '')
+        end
+        if response_filename && File.exists?(response_filename)
+          file = File.open("./#{response_filename}", "r")
+          @body = file.read
           file.close
-          [status, headers, [file_body]]
+          @body
         else
-          [status, headers, [body]]
+          nil
         end
       end
     end
