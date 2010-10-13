@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 module Rack
-  class AnythingApp
+  class Rackety
     File = ::File
     def initialize(app)
       @app = app
@@ -35,7 +35,7 @@ module Rack
   end
 end
 
-use Rack::AnythingApp
+use Rack::Rackety
 
 app = lambda { |env| [200, {'Content-Type' => 'text/html' }, 'Hello World!'] }
 run app
