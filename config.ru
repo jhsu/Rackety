@@ -11,15 +11,21 @@ module Rack
       request = Request.new(env)
       status, headers, body = @app.call(env)
       path = request.path
-      body_filename = path.split('/').reverse.first.gsub(/\?.*/, '')
-      if body_filename && !body_filename.empty? &&
-         body_filename != '/' && File.exists?(body_filename)
-        file = File.open("./#{body_filename}","r")
-        file_body = file.read
-        file.close
-        [status, headers, [file_body]]
+      if request.post? && file = request.params['file']
+        FileUtils.rm("./uploads/#{file[:filename]}") if File.exists?("./uploads/#{file[:filename]}")
+        FileUtils.mv file[:tempfile].path, "./uploads/#{file[:filename]}"
+        [status, headers, [request.params.to_s]]
       else
-        [status, headers, [body]]
+        body_filename = path.split('/').reverse.first.gsub(/\?.*/, '')
+        if body_filename && !body_filename.empty? &&
+           body_filename != '/' && File.exists?(body_filename)
+          file = File.open("./#{body_filename}","r")
+          file_body = file.read
+          file.close
+          [status, headers, [file_body]]
+        else
+          [status, headers, [body]]
+        end
       end
     end
   end
