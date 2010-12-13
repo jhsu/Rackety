@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'uri'
+
 module Rack
   class Rackety
     File = ::File
@@ -9,11 +11,18 @@ module Rack
 
     def call(env)
       @request = Request.new(env)
+      params = @request.params
       status, headers, @body = @app.call(env)
       if @request.post?
-        if file = @request.params['file']
+        if params.has_key?('file') && file = params.delete('file')
           FileUtils.mv file[:tempfile].path, "./uploads/#{file[:filename]}"
         end
+      end
+      if params.has_key?('redirect_to') && redirect_to = params.delete('redirect_to')
+        status = 303
+        url_params = {:identifier => params.delete('identifier')}.merge({:description => params["description"]})
+        url_params = URI.escape(url_params.collect{|k,v| "#{k}=#{v}"}.join('&'))
+        headers = headers.merge({'Location' => redirect_to + "?#{url_params}" })
       end
       if response_body
         [status, headers, [response_body]]
