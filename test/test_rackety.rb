@@ -1,4 +1,4 @@
-File.expand_path(File.dirname(__FILE__) + "../config.ru")
+File.expand_path(File.dirname(__FILE__) + "../lib/rackety.rb")
 require 'test/unit'
 
 class RacketyUnitTest < Test::Unit::TestCase
