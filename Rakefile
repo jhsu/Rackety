@@ -12,6 +12,5 @@ end
 Rcov::RcovTask.new do |t|
   t.test_files = FileList['test/test_*.rb']
   t.verbose = true
-  t.rcov_opts << "--test-unit-only"
   t.output_dir = "coverage"
 end

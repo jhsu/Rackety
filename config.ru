@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'uri'
-require './lib/rackety'
+require './lib/rackety/rackety'
 
 use Rack::Rackety
 
